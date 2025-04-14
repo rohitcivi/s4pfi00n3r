@@ -1,1 +1,0 @@
-code for the sample resource goes here 
