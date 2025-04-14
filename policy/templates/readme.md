@@ -1,1 +1,0 @@
-code for the policy templates exists in the directory
