@@ -1,0 +1,18 @@
+{
+    "resources": [
+    {
+        "scope": "/",
+        "type": "Microsoft.Subscription/aliases",
+        "apiVersion": "2020-09-01",
+        "name": "[parameters('subscriptionAlias')]",
+        "properties": {
+            "workload": "[parameters('subscriptionWorkload')]",
+            "displayName": "[parameters('subscriptionDisplayName')]",
+            "billingScope": "[tenantResourceId('Microsoft.Billing/billingAccounts/enrollmentAccounts', parameters('billingAccount'), parameters('enrollmentAccount'))]"
+        }
+    }
+]
+
+
+
+}
