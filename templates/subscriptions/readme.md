@@ -1,0 +1,1 @@
+define arm templates for subscriptions
