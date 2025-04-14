@@ -10,7 +10,7 @@ languages:
 ---
 # Create a New Management Group
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https%3A%2F%2Fraw.githubusercontent.com%2Frohitcivi%2Fs4pfi00n3r%2Frefs%2Fheads%2Fmain%2Farm-templates%2Fmanagement-groups%2Fazuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Frohitcivi%2Fs4pfi00n3r%2Frefs%2Fheads%2Fmain%2Farm-templates%2Fmanagement-groups%2Fazuredeploy.json)
 
 
 This template is a tenant level template that creates a new management group in the tenant.
