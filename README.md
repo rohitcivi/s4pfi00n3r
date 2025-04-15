@@ -14,4 +14,4 @@
 
 
 # Github Actions Workflow
-[Standard Workflow Process](https://raw.githubusercontent.com/Azure-Samples/terraform-github-actions/refs/heads/main/README.md)
+[Standard Workflow Process](https://github.com/Azure-Samples/terraform-github-actions/blob/main/README.md)
