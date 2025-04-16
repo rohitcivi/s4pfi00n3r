@@ -7,7 +7,7 @@ This repository automates the provisioning of Azure infrastructure using **Terra
 
 ## 📌 Core Use Cases
 
-- 🔹 **Create a Subscription**
+- 🔹 **Create a Subscription - Coding challenge**
   
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)]()
 
