@@ -5,13 +5,14 @@ terraform{
             version = "=4.1.0"
         }
     }
-}
-provider "azurerm"{
-    features{}
+backend "azurerm"{
     use_oidc    =   true
     use_azuread_auth = true
 }
-backend "azurerm"{
+
+}
+provider "azurerm"{
+    features{}
     use_oidc    =   true
     use_azuread_auth = true
 }
