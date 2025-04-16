@@ -1,5 +1,5 @@
 
-# 🚀 Azure Infrastructure Automation
+# 🚀 Azure Infrastructure Automation - POC
 
 This repository automates the provisioning of Azure infrastructure using **Terraform**, **ARM templates**, and **GitHub Actions**.
 
