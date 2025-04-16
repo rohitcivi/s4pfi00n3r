@@ -6,12 +6,13 @@ permissions:
     contents: read
 
 on:
- workflow-dispatch:
+ workflow_dispatch:
   inputs:
-        name: SelectedEnvironment
-        type: environment
-        default: "Dev"
-        required: true
+    SelectedEnvironment:
+    description: "Select Environment to Run Code"
+    type: environment
+    default: "Dev"
+    required: true
 
 
 jobs:
