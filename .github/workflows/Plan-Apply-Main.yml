@@ -1,0 +1,30 @@
+name: Plan and Apply Workflow
+run-name: "[${{github.run_number}}] [${{github.actor}}] [${{github.event_name}}]"
+
+permissions:
+    id-token: write
+    contents: read
+
+on:
+ workflow-dispatch:
+  inputs:
+        name: SelectedEnvironment
+        type: environment
+        default: "Dev"
+        required: true
+
+
+jobs:
+    Plan:
+        uses: ./.github/workflows/plan.yml
+        with:
+            runEnvironment: ${{github.event.inputs.SelectedEnvironment}}
+        secrets: inherit
+    
+    Apply:
+        uses: ./.github/workflows/apply.yml
+        with:
+            runEnvironment: ${{github.event.inputs.SelectedEnvironment}}
+        secrets: inherit
+
+

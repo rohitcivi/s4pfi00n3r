@@ -1,31 +1,87 @@
-# This is a basic workflow to help you get started with Actions
+name: 'Terraform Plan'
 
-name: CI
-
-# Controls when the workflow will run
+#This will be called from other workflows for making it reusable.
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      runEnvironment:
+        required: true
+        type: string
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+#These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+  TFBACKEND_STORAGE: "${{ secrets.STORAGE_ACC_NAME }}"
+  TFBACKEND_SA_RG: "${{ secrets.STORAGE_ACC_RG }}"
+  TFCONTAINER: "${{ secrets.TFCONTAINER }}"
+  TFSTATE: "${{ secrets.TFSTATEFILE }}"
+  
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  terraform-plan:
+    name: 'Terraform Plan'
     runs-on: ubuntu-latest
+    environment: "${{ inputs.runEnvironment }}"
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+    # Install the latest version of the Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: |
+       terraform init \
+       -backend-config="storage_account_name=$TFBACKEND_STORAGE" \
+       -backend-config="container_name=$TFCONTAINER" \
+       -backend-config="resource_group_name=$TFBACKEND_SA_RG" \
+       -backend-config="key=$TFSTATE" 
+      working-directory: ./terraform
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    # Will fail the build if not
+    - name: Terraform Format
+      run: terraform fmt -check
+      working-directory: ./terraform
+    
+    # Checks that all Terraform configuration files are valid 
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./terraform
+
+    # Generates an execution plan for Terraform 
+    - name: Terraform Plan
+      id: tf-plan
+      run: |
+        terraform plan \ 
+        -var-file = ./${{inputs.runEnvironment}}.tfvars
+        -out=${{inputs.runEnvironment}}-plan.tfplan
+      working-directory: ./terraform
+        
+    # Save plan to artifacts  
+    - name: Publish Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{inputs.runEnvironment}}-plan.tfplan
+        path: ./${{inputs.runEnvironment}}-plan.tfplan
+        working-directory: ./terraform
+    
+    - name: Terraform Show Plan
+      run: |
+        terraform show \
+          ${{inputs.runEnvironment}}-plan.tfplan
+        

@@ -1,0 +1,76 @@
+name: 'Terraform Apply'
+
+#This will be called from other workflows for making it reusable.
+on:
+  workflow_call:
+    inputs:
+      runEnvironment:
+        required: true
+        type: string
+
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+#These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+  TFBACKEND_STORAGE: "${{ secrets.STORAGE_ACC_NAME }}"
+  TFBACKEND_SA_RG: "${{ secrets.STORAGE_ACC_RG }}"
+  TFCONTAINER: "${{ secrets.TFCONTAINER }}"
+  TFSTATE: "${{ secrets.TFSTATEFILE }}"
+  
+
+jobs:
+  terraform-apply:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    environment: "${{ inputs.runEnvironment }}"
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of the Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: |
+       terraform init \
+       -backend-config="storage_account_name=$TFBACKEND_STORAGE" \
+       -backend-config="container_name=$TFCONTAINER" \
+       -backend-config="resource_group_name=$TFBACKEND_SA_RG" \
+       -backend-config="key=$TFSTATE" 
+      working-directory: ./terraform
+
+    # Generates an execution plan for Terraform to be revalidated to detect drifts
+    - name: Terraform Plan
+      id: tf-plan
+      run: |
+        terraform plan \ 
+        -var-file = ./${{inputs.runEnvironment}}.tfvars
+        -out=${{inputs.runEnvironment}}-plan.tfplan
+      working-directory: ./terraform
+        
+      
+    - name: Terraform Show Plan
+      run: |
+        terraform show \
+          ${{inputs.runEnvironment}}-plan.tfplan
+      working-directory: ./terraform
+
+    - name: Terraform Apply
+      run: |
+            terraform apply \
+              ${{inputs.runEnvironment}}-plan.tfplan
+      working-directory: ./terraform
+        
