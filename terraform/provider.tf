@@ -2,19 +2,17 @@ terraform{
     required_providers{
         azurerm = {
             source = "hashicorp/azurerm"
-            version = "~=3.61.0"
+            version = "=4.1.0"
         }
     }
-backend "azurerm"{
-    use_oidc    =   true
-    use_azuread_auth = true
 }
-
 provider "azurerm"{
     features{}
     use_oidc    =   true
     use_azuread_auth = true
 }
-
-
+backend "azurerm"{
+    use_oidc    =   true
+    use_azuread_auth = true
 }
+
